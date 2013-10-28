@@ -53,8 +53,6 @@ $(document).ready(function() {
 			}
 		}
 		drawingBoardData.set(tmp);
-		console.log("Done!");
-		console.log("Showing...");
 		$("table").show();
 		$("div#please-wait-message").remove();
 	}
