@@ -11,9 +11,11 @@ $(document).ready(function() {
 	drawingBoardData.on('value', function(snapshot) {
 		drawingBoardData.off('value');
 		if (snapshot.val() == null) {
+			$("table").hide();
+			$("body").append("<div id=\"please-wait-message\">Please wait. Initializing drawboard...</div>");
+			initBackEnd();
 			return;
 		}
-		arr = snapshot.val();
 		for (var i = 0; i < snapshot.val().length; i++) {
 			paint(snapshot.val()[i]);
 		}
@@ -23,8 +25,7 @@ $(document).ready(function() {
 		mousedown = true;
 		var row = $(this).data("row"), col = $(this).data("col");
 		$(this).css("background-color", getRGBNotation());
-		arr[row][col] = {red: red, green: green, blue: blue, row: row, col: col};
-		drawingBoardData.set(arr);
+		drawingBoardData.child(row).child(col).set({red: red, green: green, blue: blue, row: row, col: col});
 	});
 
 	$("html").mouseup(function() {
@@ -35,14 +36,28 @@ $(document).ready(function() {
 		if (mousedown) {
 			var row = $(this).data("row"), col = $(this).data("col");
 			$(this).css("background-color", getRGBNotation());
-			arr[row][col] = {red: red, green: green, blue: blue, row: row, col: col};
-			drawingBoardData.set(arr);
+			drawingBoardData.child(row).child(col).set({red: red, green: green, blue: blue, row: row, col: col});
 		}
 	});
 
 	$("input").change(function() {
 		$("div#preview").css("background-color", getRGBNotation());
 	});
+
+	function initBackEnd() {
+		var tmp = [];
+		for (var i = 0; i < 25; i++) {
+			tmp[i] = []
+			for (var j = 0; j < 25; j++) {
+				tmp[i][j] = {red: 255, green: 255, blue: 255, row: i, col: j};
+			}
+		}
+		drawingBoardData.set(tmp);
+		console.log("Done!");
+		console.log("Showing...");
+		$("table").show();
+		$("div#please-wait-message").remove();
+	}
 
 	function getRGBNotation() {
 		red = $("input#red").val();
@@ -57,7 +72,6 @@ $(document).ready(function() {
 
 	function paint(input) {
 		for (var i = 0; i < input.length; i++) {
-			console.log(input[i].row + ", " + input[i].col);
 			$("table tr:nth-of-type(" + (input[i].row+1) + ") td:nth-of-type(" + (input[i].col+1) + ")").css("background-color", getRGBNotationFromParams(input[i]));
 		}
 	}
